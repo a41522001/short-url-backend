@@ -4,12 +4,15 @@ using ShortUrlPJ.Contexts;
 using ShortUrlPJ.Filters;
 using ShortUrlPJ.Services;
 using ShortUrlPJ.Services.Interfaces;
-
+using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ShortUrlDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis")
+                            ?? "localhost:6379";
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddScoped<IUrlService, UrlService>();
 builder.Services.AddControllers(options =>
 {
