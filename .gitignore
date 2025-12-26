@@ -1,0 +1,15 @@
+[Bb]in/
+[Oo]bj/
+
+TestResults/
+
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+
+.env
+.env.local
+appsettings.json

@@ -1,0 +1,49 @@
+﻿version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dotnet-short-url:latest
+    container_name: dotnet-short-url-api
+    ports:
+      - "5000:8080"
+    depends_on:
+        db:
+          condition: service_healthy    
+        redis:
+          condition: service_started
+    env_file: './.env'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=postgres;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - AppSettings__BaseUrl=${BASE_URL}
+    restart: on-failure
+
+  db:
+    image: postgres:18.1
+    container_name: dotnet-short-url-db
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - Short-URL-Postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4
+    container_name: dotnet-short-url-redis
+    ports: 
+      - "6379:6379"
+    volumes:
+      - Short-URL-redis:/data
+
+volumes:
+  Short-URL-Postgres:
+  Short-URL-redis:
